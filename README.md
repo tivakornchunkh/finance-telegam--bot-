@@ -1,129 +1,128 @@
-# Personal Finance Telegram Bot 🤖💰
+# Telegram Finance Bot 🤖💸
 
-> ระบบผู้ช่วยบันทึกรายรับ-รายจ่ายส่วนตัวผ่าน **Telegram** ขับเคลื่อนด้วย **Google Gemini Multimodal AI (Vision & Thai NLP)** และใช้ **Google Sheets** เป็น Single Source of Truth
+บอทบันทึกรายรับ-รายจ่ายส่วนตัวบน Telegram เชื่อมต่อกับ **Google Sheets** โดยตรง และใช้ **Google Gemini AI** ช่วยอ่านสลิปธนาคาร ถอดเสียงพูด และคุยตอบคำถามเรื่องการเงิน
 
----
-
-## 🌟 ฟีเจอร์หลัก (Core Features)
-
-- 📝 **บันทึกจากข้อความภาษาไทยธรรมดา:** เช่น `จ่าย 55 ข้าว`, `ซื้อกาแฟ 75`, `ได้รับ 500 จากแม่` โดย AI จะสกัดจำนวนเงิน หมวดหมู่ และทิศทางเงินให้อัตโนมัติ (ห้ามเดาตัวเลข)
-- 🧾 **อ่านสลิปธนาคารไทยด้วย Vision AI:** สกัดยอดเงิน, วันที่, เวลา, ร้านค้า/ผู้รับ และเลขอ้างอิง (Transaction Reference) จากรูปสลิป (K PLUS, SCB, Krungthai ฯลฯ)
-- 📷 **สลิป + ข้อความ:** ส่งรูปสลิปพร้อมพิมพ์คำอธิบายประกอบ เช่น `ค่าอาหารกับเพื่อน`
-- 🛡️ **ระบบป้องกันรายการซ้ำ (Duplicate Protection):** ตรวจจับจากเลขอ้างอิงสลิป, Telegram File ID และเวลา-ยอดเงินซ้ำ
-- 📊 **สรุปและคำนวณยอดเงินสด (Dynamic Calculation):** คำนวณจาก `Starting Balance + รายรับ - รายจ่าย = ยอดคงเหลือ` โดยอ่านสดจาก Google Sheets ทุกครั้ง
-- 🔔 **แจ้งเตือนส่งยอดประจำวัน (Daily Reminder):** แจ้งเตือนเวลา 20:00 น. และ 22:00 น. หากวันนี้ยังไม่มีการบันทึกรายการ
-- 📁 **ส่งออกข้อมูล (CSV Export):** ดาวน์โหลดไฟล์ CSV ของรายการทั้งหมดผ่านคำสั่ง `/export`
-- 🔒 **ความปลอดภัยสูง (Security First):** Whitelist เฉพาะ Telegram User ID ที่ได้รับอนุญาตเท่านั้น และเก็บข้อมูลใน Google Sheets ส่วนตัวของคุณ
+ไม่ต้องเปิด Web App ให้ยุ่งยาก แค่แชทกับบอทใน Telegram ข้อมูลก็บันทึกลง Google Sheet ทันที
 
 ---
 
-## 🏗️ โครงสร้างระบบ (Architecture)
+## ✨ บอททำอะไรได้บ้าง?
 
-```
-src/
-├── config/           # โหลดและตรวจสอบค่า Environment Variables (.env)
-├── ai/               # เชื่อมต่อ Google Gemini API สำหรับแปลข้อความและอ่านรูปสลิป
-├── sheets/           # เชื่อมต่อ Google Sheets API v4 ผ่าน Service Account
-├── transactions/     # ตรรกะตรวจสอบข้อมูล (Validator) และตรวจจับรายการซ้ำ (Duplicate)
-├── summary/          # คำนวณยอดคงเหลือ สรุปรายวัน และสรุปรายเดือนด้วย Code Logic
-├── reminder/         # ตัวตั้งเวลาแจ้งเตือนรายวัน (node-cron) ตามเวลาประเทศไทย
-├── bot/              # ตัวจัดการ Telegram Bot (grammY) และ Inline Keyboards
-└── index.ts          # จุดเริ่มต้นการทำงานของแอปพลิเคชัน
-```
+- 🧾 **อ่านสลิปโอนเงินอัตโนมัติ:** ส่งรูปสลิปธนาคารไทย (K PLUS, SCB, Krungthai, เป๋าตัง ฯลฯ) บอทจะดึงยอดเงิน วันที่ เวลา และเลขอ้างอิงลงชีตให้ทันที
+- 🎙️ **สั่งงานด้วยเสียง:** ขี้เกียจพิมพ์ก็กดอัดเสียงส่ง เช่น *"จ่ายค่าข้าว 60 บาท"* AI ฟังภาษาไทยรู้เรื่อง
+- 📝 **พิมพ์ภาษาพูดธรรมดา:** เช่น `ข้าวผัด 50`, `จ่ายค่าน้ำ 120`, `แม่โอนให้ 500` บอทแยกหมวดหมู่และทิศทางเงินให้เอง
+- 📈 **ดูกราฟค่าใช้จ่าย:** พิมพ์ `/chart` บอทจะวาด Pie Chart สรุปหมวดหมู่เงินที่จ่ายไปในเดือนนั้นเป็นรูปภาพส่งมาให้
+- 🎯 **ตั้งงบประมาณรายเดือน:** กำหนดงบด้วย `/setbudget 15000` มีแถบ Progress Bar เช็คได้ตลอดเวลา และเตือนเมื่อใช้เงินแตะ 80% หรือเกิน 100%
+- 🧠 **คุยปรึกษาเรื่องการเงิน:** พิมพ์ถามคุยเล่นได้ เช่น *"เดือนนี้ใช้เงินเยอะมั้ย"*, *"ช่วยแนะนำวิธีประหยัดเงินหน่อย"* บอทจะดึงสถิติจริงในชีตมาช่วยวิเคราะห์
+- ⚡ **โหมด Auto-Save:** สลับโหมดด้วย `/mode` ให้บันทึกลงชีตทันที หรือจะให้ส่งปุ่มมาให้กดยืนยันก่อนก็ได้
+- 🛡️ **ระบบป้องกันคนอื่นมาใช้:** ล็อกสิทธิ์เฉพาะ Telegram ID ของเราคนเดียว คนอื่นทักมาบอทจะไม่ตอบ
 
 ---
 
-## 📋 ความต้องการขั้นต่ำ (Requirements)
+## 🛠️ สิ่งที่ต้องเตรียมล่วงหน้า (ฟรีทั้งหมด)
 
-- **Node.js**: เวอร์ชัน 20 หรือ 22+ (ทดสอบแล้วบน Node.js v24 LTS)
-- **Telegram Account**: สำหรับสร้าง Bot ผ่าน `@BotFather`
-- **Google Cloud Account**: สำหรับเปิดใช้งาน Google Sheets API และสร้าง Service Account
-- **Google AI Studio API Key**: สำหรับใช้งานโมเดล Gemini 2.5 Flash ฟรี
+1. **Node.js** (แนะนำเวอร์ชัน 20 ขึ้นไป)
+2. **Telegram Bot Token** จาก `@BotFather`
+3. **Telegram User ID ของตัวเอง** ดูได้จาก `@userinfobot`
+4. **Google Gemini API Key** ขอฟรีได้ที่ [Google AI Studio](https://aistudio.google.com/)
+5. **Google Sheet + Service Account** สำหรับเป็นฐานข้อมูล (มีวิธีทำด้านล่าง)
 
 ---
 
-## 🚀 ขั้นตอนการติดตั้งและตั้งค่า (Step-by-Step Setup)
+## 🚀 วิธีติดตั้งและรันบอท
 
-### 1. ติดตั้ง Dependencies
+### 1. โคลนโปรเจกต์และติดตั้ง Library
+
 ```bash
+git clone https://github.com/tivakornchunkh/finance-telegam--bot-.git
+cd finance-telegam--bot-
 npm install
 ```
 
-### 2. สร้าง Telegram Bot Token
-1. เปิด Telegram แล้วค้นหาบัญชี `@BotFather`
-2. ส่งคำสั่ง `/newbot` แล้วตั้งชื่อบอท และ username (ต้องลงท้ายด้วย `bot`)
-3. คัดลอก **HTTP API Token** ที่ได้มาเก็บไว้
-4. ค้นหาบัญชี `@userinfobot` ใน Telegram เพื่อดู **Telegram User ID** ตัวเลขของคุณ
+---
 
-### 3. ขอรับ Gemini API Key (ฟรี)
-1. ไปที่ [Google AI Studio](https://aistudio.google.com/)
-2. เข้าสู่ระบบด้วยบัญชี Google แล้วคลิก **"Get API key"**
-3. สร้างและคัดลอก API Key มาเก็บไว้
+### 2. เตรียม Google Sheet และ Service Account
 
-### 4. สร้าง Google Service Account & Google Sheets
-1. ไปที่ [Google Cloud Console](https://console.cloud.google.com/)
-2. สร้างโปรเจกต์ใหม่ (เช่น `tele-finance-bot`)
-3. ไปที่ **APIs & Services > Library** ค้นหาและกด **Enable "Google Sheets API"**
-4. ไปที่ **IAM & Admin > Service Accounts** แล้วคลิก **Create Service Account**
-5. ตั้งชื่อ Service Account แล้วกดสร้างเสร็จสิ้น
-6. คลิกที่ Service Account ที่เพิ่งสร้าง > แท็บ **Keys** > กด **Add Key > Create new key > JSON**
-7. ไฟล์ JSON จะถูกดาวน์โหลดลงเครื่อง ให้เปลี่ยนชื่อเป็น `service-account.json` แล้วนำมาวางไว้ในโฟลเดอร์โปรเจกต์นี้
-8. คัดลอกอีเมลของ Service Account (ลงท้ายด้วย `@...iam.gserviceaccount.com`)
-9. สร้าง Google Spreadsheet ใหม่ที่ [Google Sheets](https://sheets.new)
-10. กดปุ่ม **แชร์ (Share)** ที่มุมขวาบนของ Spreadsheet แล้ววางอีเมล Service Account ลงไป กำหนดสิทธิ์เป็น **Editor**
-11. คัดลอก **Spreadsheet ID** จาก URL ของเบราว์เซอร์:
-    `https://docs.google.com/spreadsheets/d/{SPREADSHEET_ID}/edit`
+1. ไปที่ [Google Cloud Console](https://console.cloud.google.com/) สร้างโปรเจกต์ใหม่
+2. เข้าเมนู **APIs & Services > Library** ค้นหาและกด **Enable "Google Sheets API"**
+3. ไปที่ **IAM & Admin > Service Accounts** กด **Create Service Account** ตั้งชื่อแล้วกดสร้าง
+4. คลิกเข้าไปที่ Service Account ที่เพิ่งสร้าง > ไปที่แท็บ **Keys** > กด **Add Key > Create new key (เลือก JSON)**
+5. ไฟล์จะโหลดลงเครื่อง ให้เปลี่ยนชื่อไฟล์เป็น `service-account.json` แล้วเอามาวางไว้ในโฟลเดอร์หลักของโปรเจกต์
+6. สร้าง [Google Sheet](https://sheets.new) เปล่าๆ ขึ้นมา 1 ไฟล์
+7. กดปุ่ม **แชร์ (Share)** มุมขวาบน นำ**อีเมลของ Service Account** (ที่ลงท้ายด้วย `@...iam.gserviceaccount.com`) มาใส่ และให้สิทธิ์เป็น **Editor**
+8. คัดลอก **Sheet ID** จาก URL ของ Google Sheet:
+   `https://docs.google.com/spreadsheets/d/`**`ตรงนี้คือ_SHEET_ID`**`/edit`
 
-### 5. กำหนดค่า Environment Variables (.env)
-คัดลอกไฟล์ `.env.example` เป็น `.env`:
+---
+
+### 3. ตั้งค่าไฟล์ `.env`
+
+คัดลอกไฟล์ตัวอย่าง `.env.example` มาเป็น `.env`:
+
 ```bash
 cp .env.example .env
 ```
-จากนั้นแก้ไขค่าในไฟล์ `.env`:
+
+จากนั้นเปิดไฟล์ `.env` แล้วกรอกค่าของคุณ:
+
 ```env
-TELEGRAM_BOT_TOKEN=123456789:ABCdefGHIjklMNOpqrSTUvwxYZ
-AUTHORIZED_TELEGRAM_USER_ID=123456789
-GEMINI_API_KEY=AIzaSy...
-GOOGLE_SHEET_ID=1A2B3C4D5E...
+TELEGRAM_BOT_TOKEN=ใส่_Bot_Token_จาก_BotFather
+AUTHORIZED_TELEGRAM_USER_ID=ใส่_User_ID_ของคุณ
+GEMINI_API_KEY=ใส่_Gemini_API_Key
+GOOGLE_SHEET_ID=ใส่_Google_Sheet_ID
 GOOGLE_SERVICE_ACCOUNT_KEY_FILE=./service-account.json
 TIMEZONE=Asia/Bangkok
-DEFAULT_ACCOUNT=K PLUS
-REMINDER_TIME=20:00
-SECOND_REMINDER_TIME=22:00
 ```
+
+*(หรือจะรันคำสั่ง `npm run setup` เพื่อให้ระบบ Wizard ช่วยถามและกรอกค่าให้ทีละข้อก็ได้)*
 
 ---
 
-## 🏃 การรันบอท (Running the Bot)
+### 4. สั่งรันบอท
 
-### โหมดพัฒนา (Development Mode)
 ```bash
-npm run dev
-```
-
-### การรัน Unit Tests (TDD Verification)
-```bash
-npm test
-```
-
-### Build และ Run ใน Production
-```bash
+# คอมไพล์โค้ด
 npm run build
-node dist/src/index.js
+
+# รันบอท
+npm start
 ```
+
+ถ้าขึ้นข้อความ:
+`[Ready] Bot @your_bot is running and listening for messages!`  
+แปลว่าบอทพร้อมใช้งานแล้ว ทักไปเล่นใน Telegram ได้เลย!
 
 ---
 
-## 💬 ตัวอย่างคำสั่งและการใช้งาน
+## 📱 คำสั่งที่ใช้บ่อยใน Telegram
 
-- `จ่าย 55 ข้าว` ➜ บอทแสดงตัวอย่างรายการและปุ่มยืนยัน
-- `ได้รับ 500 จากแม่` ➜ บันทึกเป็นรายรับ
-- ส่งรูปสลิปโอนเงิน ➜ บอทอ่านยอดเงิน ร้านค้า วันเวลา และ Ref จากสลิป
-- `/start` ➜ เริ่มต้นใช้งาน ตรวจสอบยอดเงินเริ่มต้น
-- `/setbalance 5000` ➜ กำหนดยอดเงินเริ่มต้นเป็น 5,000 บาท
-- `/today` หรือ "สรุปวันนี้" ➜ ดูสรุปรายรับ-รายจ่ายและหมวดหมู่ของวันนี้
-- `/month` หรือ "สรุปเดือนนี้" ➜ ดูสรุปประจำเดือน ยอดสูงสุด และค่าเฉลี่ย
-- `/balance` หรือ "ยอดเงินเหลือเท่าไหร่" ➜ ดูยอดเงินสุทธิคงเหลือจริง
-- `/delete` ➜ ขอลบรายการล่าสุดที่เพิ่งบันทึก
-- `/export` ➜ ดาวน์โหลดรายการทั้งหมดเป็นไฟล์ CSV
+| คำสั่ง | สิ่งที่บอทจะตอบ |
+| :--- | :--- |
+| `/start` | แนะนำตัวและเช็คยอดเงินเริ่มต้น |
+| `/today` | สรุปรายรับ-รายจ่ายของวันนี้ |
+| `/month` | สรุปยอดรวมประจำเดือน |
+| `/chart` | สรุปเป็นรูปภาพกราฟวงกลม (Pie Chart) |
+| `/balance` | ดูยอดเงินคงเหลือสุทธิปัจจุบัน |
+| `/budget` | ดูความคืบหน้างบประมาณประจำเดือน |
+| `/setbudget 15000` | ตั้งงบประมาณเดือนนี้เป็น 15,000 บาท |
+| `/mode` | สลับโหมด บันทึกทันที (Auto-Save) หรือ รอกดยืนยัน (Confirm) |
+| `/setbalance 5000` | ตั้งค่ายอดเงินสดเริ่มต้น |
+| `/limits` | เช็คโควต้า Gemini AI และจำนวนครั้งที่บันทึกลงชีตวันนี้ |
+| `/delete` | ขอลบรายการล่าสุดที่เพิ่งบันทึก |
+| `/export` | ขอไฟล์ Excel/CSV ข้อมูลทั้งหมด |
 
+---
+
+## ⚠️ ปัญหาที่พบบ่อย (Troubleshooting)
+
+- **บอทบอกบันทึกแล้ว แต่ใน Sheet ไม่มีข้อมูล:**  
+  ตรวจดูว่าได้กดแชร์ชีตให้อีเมล Service Account เป็น **Editor** แล้วหรือยัง และตรวจสอบ `GOOGLE_SHEET_ID` ใน `.env` ว่าตรงกับชีตที่เปิดอยู่ไหม
+- **บอทไม่ยอมตอบข้อความ:**  
+  ตรวจดูว่า Telegram ID ของคุณใน `.env` (`AUTHORIZED_TELEGRAM_USER_ID`) ตรงกับตัวเลขที่ได้จาก `@userinfobot` หรือไม่ ถ้าไม่ตรงบอทจะไม่ตอบเพื่อความปลอดภัย
+- **อยากรันบอททิ้งไว้ตลอด:**  
+  ถ้าเปิดคอมทิ้งไว้ สามารถใช้เครื่องมือพวก `pm2` รันพื้นหลังได้ (`npm install -g pm2` แล้วรัน `pm2 start dist/src/index.js --name "tele-bot"`)
+
+---
+
+## 📄 License
+MIT License - เอาไปปรับแต่งและใช้งานได้ฟรีตามสบายครับ

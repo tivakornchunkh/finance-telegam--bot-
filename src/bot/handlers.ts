@@ -339,7 +339,8 @@ export async function handleLimitsCommand(ctx: Context): Promise<void> {
   message += `• บันทึกสะสมทั้งหมด: **${transactions.length} รายการ**\n`;
   message += `• โควต้า Sheets API: **300 ครั้ง/นาที** (ไม่จำกัดจำนวนครั้งต่อวัน)\n\n`;
 
-  message += `⏱️ **สถานะเซิร์ฟเวอร์บอท (\`@wavon_bot\`)**\n`;
+  const botTag = ctx.me?.username ? `\`@${ctx.me.username}\`` : 'Bot';
+  message += `⏱️ **สถานะเซิร์ฟเวอร์บอท (${botTag})**\n`;
   message += `• สถานะ: 🟢 **กำลังรับข้อความ (Polling Active)**\n`;
   message += `• เวลาปัจจุบัน: \`${getBangkokNow().format('YYYY-MM-DD HH:mm:ss')} (UTC+7)\`\n`;
   message += `• เวลาแจ้งเตือนรายวัน: \`20:00\` และ \`22:00\` น.\n`;
