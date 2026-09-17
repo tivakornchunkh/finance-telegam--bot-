@@ -1,0 +1,33 @@
+{
+  "name": "tele-bot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "build": "tsc",
+    "start": "node dist/src/index.js",
+    "test": "vitest run",
+    "setup": "node scripts/setup-wizard.js"
+  },
+  "type": "module",
+  "dependencies": {
+    "@google/genai": "^2.23.0",
+    "dayjs": "^1.11.23",
+    "dotenv": "^17.4.2",
+    "googleapis": "^181.0.0",
+    "grammy": "^1.46.0",
+    "node-cron": "^4.6.0",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.1",
+    "@types/node-cron": "^3.0.11",
+    "tsx": "^4.23.13",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.1"
+  }
+}

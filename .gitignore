@@ -1,0 +1,15 @@
+node_modules/
+dist/
+.env
+*.env*
+*.local
+service-account*.json
+credentials*.json
+dark-hall-*.json
+*.key.json
+*.pem
+.DS_Store
+Thumbs.db
+*.log
+text
+
