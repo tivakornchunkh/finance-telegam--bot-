@@ -1,4 +1,3 @@
-import http from 'http';
 import { getConfig } from './config/config.js';
 import { initializeSpreadsheet } from './sheets/client.js';
 import { createBot, registerBotCommands } from './bot/telegram.js';
@@ -11,25 +10,7 @@ async function bootstrap() {
 
   const config = getConfig();
 
-  // 1. Start lightweight HTTP health-check server for Cloud deployments (Koyeb, Render, etc.)
-  const port = process.env.PORT || 8000;
-  const server = http.createServer((req, res) => {
-    res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(
-      JSON.stringify({
-        status: 'ok',
-        bot: '@wavon_bot',
-        uptime: Math.round(process.uptime()),
-        timestamp: new Date().toISOString(),
-      })
-    );
-  });
-
-  server.listen(port, () => {
-    console.log(`[HTTP Health Check] Listening on port ${port}`);
-  });
-
-  // 2. Initialize Google Sheets
+  // 1. Initialize Google Sheets
   try {
     console.log(`[Init] Connecting to Google Sheet: ${config.GOOGLE_SHEET_ID}...`);
     await initializeSpreadsheet();
@@ -38,14 +19,14 @@ async function bootstrap() {
     console.error('[Init Error] Failed to initialize Google Sheets. Bot will still launch for offline handlers.', error);
   }
 
-  // 3. Setup Bot
+  // 2. Setup Bot
   const bot = createBot();
   await registerBotCommands(bot);
 
-  // 4. Start Schedulers
+  // 3. Start Schedulers
   startReminderScheduler(bot);
 
-  // 5. Start Telegram Bot Polling with Resilience
+  // 4. Start Telegram Bot Polling with Resilience
   async function startWithRetry() {
     try {
       await bot.api.deleteWebhook({ drop_pending_updates: true }).catch(() => {});
@@ -71,7 +52,6 @@ async function bootstrap() {
   // Graceful shutdown
   const stop = async () => {
     console.log('\n[Shutdown] Stopping bot gracefully...');
-    server.close();
     await bot.stop();
     process.exit(0);
   };
