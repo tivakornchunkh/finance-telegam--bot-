@@ -1,0 +1,12 @@
+node_modules
+dist
+.env*
+service-account*.json
+credentials*.json
+dark-hall-*.json
+*.key.json
+*.pem
+*.log
+.git
+.DS_Store
+Thumbs.db

@@ -78,6 +78,33 @@ npm start
 
 ถ้าขึ้นข้อความว่า `Bot is running and listening for messages!` แสดงว่าบอทเริ่มทำงานแล้ว ทดสอบทักไปใน Telegram ได้เลย
 
+---
+
+## วิธีนำขึ้น Google Cloud Run (ออนไลน์ 24 ชม. ฟรี ไม่ต้องเปิดคอม)
+
+ระบบนี้รองรับ **Google Cloud Run (Serverless Webhook)** ในตัว ทำให้บอทออนไลน์ตลอด 24 ชั่วโมงโดยไม่มีวันหลับ และใช้โควต้าฟรีของ Google Cloud ได้เต็มที่
+
+1. อัปโหลดโปรเจกต์นี้ขึ้น GitHub ของคุณ (ตั้งเป็น Private)
+2. เข้าไปที่ [Google Cloud Console](https://console.cloud.google.com/) > ไปที่เมนู **Cloud Run**
+3. กดปุ่ม **Create Service**
+4. เลือก **Continuously deploy from a repository** แล้วเชื่อมต่อ GitHub กับโปรเจกต์นี้
+5. เลือก Build type เป็น **Dockerfile**
+6. ตั้งค่า Service:
+   - **Region:** `asia-southeast1` (สิงคโปร์ - เร็วที่สุดสำหรับไทย)
+   - **Authentication:** เลือก `Allow unauthenticated invocations`
+   - **Scaling:** Minimum instances ตั้งเป็น `0` (เพื่อให้สเกลลงเมื่อไม่มีคนใช้ ไม่เสียค่าบริการ)
+7. ในหัวข้อ **Variables & Secrets** ให้เพิ่ม Environment Variables:
+   - `TELEGRAM_BOT_TOKEN`
+   - `AUTHORIZED_TELEGRAM_USER_ID`
+   - `GEMINI_API_KEY`
+   - `GOOGLE_SHEET_ID`
+   - `GOOGLE_SERVICE_ACCOUNT_JSON` (ใส่รหัส JSON ของ Service Account เป็นบรรทัดเดียว หรือแปลงเป็น Base64)
+   - `BOT_MODE` = `webhook`
+   - `WEBHOOK_URL` = URL ของ Cloud Run ที่ได้ (เช่น `https://xxx.a.run.app`)
+8. กด **Create** รอระบบสร้างเสร็จ บอทจะออนไลน์ 24 ชั่วโมงทันที
+
+---
+
 ## คำสั่งในบอท
 
 - `/start` - เริ่มต้นใช้งาน

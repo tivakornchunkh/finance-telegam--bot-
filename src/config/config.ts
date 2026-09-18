@@ -15,6 +15,10 @@ const envSchema = z.object({
   DEFAULT_ACCOUNT: z.string().default('K PLUS'),
   REMINDER_TIME: z.string().default('20:00'),
   SECOND_REMINDER_TIME: z.string().default('22:00'),
+  BOT_MODE: z.enum(['polling', 'webhook']).default('polling'),
+  WEBHOOK_URL: z.string().optional(),
+  WEBHOOK_SECRET: z.string().optional(),
+  PORT: z.string().default('8080'),
 });
 
 export type Config = z.infer<typeof envSchema>;
@@ -23,7 +27,12 @@ let parsedConfig: Config | null = null;
 
 export function getConfig(): Config {
   if (!parsedConfig) {
-    const result = envSchema.safeParse(process.env);
+    const rawEnv = {
+      ...process.env,
+      BOT_MODE: process.env.BOT_MODE || (process.env.WEBHOOK_URL ? 'webhook' : 'polling'),
+      PORT: process.env.PORT || '8080',
+    };
+    const result = envSchema.safeParse(rawEnv);
     if (!result.success) {
       const issues = result.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join('\n');
       console.warn(`[Config Warning] Missing or invalid environment variables:\n${issues}`);
@@ -40,6 +49,10 @@ export function getConfig(): Config {
         DEFAULT_ACCOUNT: process.env.DEFAULT_ACCOUNT || 'K PLUS',
         REMINDER_TIME: process.env.REMINDER_TIME || '20:00',
         SECOND_REMINDER_TIME: process.env.SECOND_REMINDER_TIME || '22:00',
+        BOT_MODE: (process.env.BOT_MODE as 'polling' | 'webhook') || (process.env.WEBHOOK_URL ? 'webhook' : 'polling'),
+        WEBHOOK_URL: process.env.WEBHOOK_URL,
+        WEBHOOK_SECRET: process.env.WEBHOOK_SECRET,
+        PORT: process.env.PORT || '8080',
       };
     }
     parsedConfig = result.data;
