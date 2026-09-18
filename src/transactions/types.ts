@@ -18,6 +18,7 @@ export interface Transaction {
   createdBy: string;
   receiptReference: string | null;
   createdAt: string; // ISO 8601 string
+  slipImageUrl?: string | null;
 }
 
 export interface ParsedTransactionData {

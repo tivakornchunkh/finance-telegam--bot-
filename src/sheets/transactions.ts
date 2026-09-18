@@ -12,6 +12,10 @@ export async function appendTransaction(txn: Omit<Transaction, 'id' | 'createdAt
   const id = `TXN-${dateCompact}-${randomSuffix}`;
   const createdAt = now.toISOString();
 
+  const slipFormula = txn.slipImageUrl
+    ? `=HYPERLINK("${txn.slipImageUrl}", IFERROR(IMAGE("${txn.slipImageUrl}", 1), "🖼️ ดูรูปสลิป"))`
+    : '';
+
   const row = [
     id,
     txn.date,
@@ -28,11 +32,12 @@ export async function appendTransaction(txn: Omit<Transaction, 'id' | 'createdAt
     txn.createdBy,
     txn.receiptReference || '',
     createdAt,
+    slipFormula,
   ];
 
   await sheets.spreadsheets.values.append({
     spreadsheetId: config.GOOGLE_SHEET_ID,
-    range: 'Transactions!A:O',
+    range: 'Transactions!A:P',
     valueInputOption: 'USER_ENTERED',
     requestBody: {
       values: [row],
@@ -52,7 +57,7 @@ export async function getAllTransactions(): Promise<Transaction[]> {
 
   const res = await sheets.spreadsheets.values.get({
     spreadsheetId: config.GOOGLE_SHEET_ID,
-    range: 'Transactions!A2:O',
+    range: 'Transactions!A2:P',
   });
 
   const rows = res.data.values || [];
@@ -72,6 +77,7 @@ export async function getAllTransactions(): Promise<Transaction[]> {
     createdBy: row[12] || '',
     receiptReference: row[13] || null,
     createdAt: row[14] || '',
+    slipImageUrl: row[15] || null,
   }));
 }
 
@@ -94,7 +100,7 @@ export async function deleteTransactionById(id: string): Promise<boolean> {
   // Clear row content
   await sheets.spreadsheets.values.clear({
     spreadsheetId: config.GOOGLE_SHEET_ID,
-    range: `Transactions!A${actualRow}:O${actualRow}`,
+    range: `Transactions!A${actualRow}:P${actualRow}`,
   });
 
   return true;

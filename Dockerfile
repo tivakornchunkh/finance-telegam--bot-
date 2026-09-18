@@ -23,3 +23,4 @@ COPY --from=builder /app/dist ./dist
 EXPOSE 8080
 
 CMD ["node", "dist/src/index.js"]
+

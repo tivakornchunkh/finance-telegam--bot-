@@ -66,6 +66,7 @@ export const TRANSACTION_HEADERS = [
   'CreatedBy',
   'ReceiptReference',
   'CreatedAt',
+  'SlipImage',
 ];
 
 export const SETTINGS_HEADERS = [
@@ -184,6 +185,19 @@ async function ensureHeader(
     });
     return true;
   }
+
+  const currentHeaders = (res.data.values[0] || []) as string[];
+  if (currentHeaders.length < headers.length) {
+    await sheets.spreadsheets.values.update({
+      spreadsheetId,
+      range: `${sheetName}!A1`,
+      valueInputOption: 'USER_ENTERED',
+      requestBody: { values: [headers] },
+    });
+    console.log(`[Sheets] Updated headers for ${sheetName} (${currentHeaders.length} -> ${headers.length} cols).`);
+    return true;
+  }
+
   return false;
 }
 

@@ -19,6 +19,7 @@ const envSchema = z.object({
   WEBHOOK_URL: z.string().optional(),
   WEBHOOK_SECRET: z.string().optional(),
   PORT: z.string().default('8080'),
+  IMGBB_API_KEY: z.string().optional(),
 });
 
 export type Config = z.infer<typeof envSchema>;
@@ -53,6 +54,7 @@ export function getConfig(): Config {
         WEBHOOK_URL: process.env.WEBHOOK_URL,
         WEBHOOK_SECRET: process.env.WEBHOOK_SECRET,
         PORT: process.env.PORT || '8080',
+        IMGBB_API_KEY: process.env.IMGBB_API_KEY,
       };
     }
     parsedConfig = result.data;

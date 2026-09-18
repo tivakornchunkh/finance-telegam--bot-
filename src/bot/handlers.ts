@@ -27,6 +27,7 @@ import {
 } from './keyboards.js';
 import { Transaction, UserSettings } from '../transactions/types.js';
 import { getAiUsageStats } from '../ai/tracker.js';
+import { uploadSlipImage } from '../utils/uploader.js';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -645,8 +646,14 @@ export async function handlePhotoMessage(ctx: Context): Promise<void> {
     const arrayBuffer = await response.arrayBuffer();
     const imageBuffer = Buffer.from(arrayBuffer);
 
-    const categories = await getActiveCategories();
-    const settings = await getUserSettings(userId);
+    const [categories, settings, slipImageUrl] = await Promise.all([
+      getActiveCategories(),
+      getUserSettings(userId),
+      uploadSlipImage(imageBuffer, `slip_${Date.now()}.jpg`, 'image/jpeg').catch((err) => {
+        console.warn('[Slip Upload] Upload failed:', err);
+        return null;
+      }),
+    ]);
 
     const parsed = await parseSlipImage(imageBuffer, 'image/jpeg', caption, categories, todayStr);
 
@@ -675,6 +682,9 @@ export async function handlePhotoMessage(ctx: Context): Promise<void> {
     }
 
     validation.transaction.receiptReference = photo.file_id;
+    if (slipImageUrl) {
+      validation.transaction.slipImageUrl = slipImageUrl;
+    }
 
     // Check duplicate
     const existing = await getAllTransactions();
@@ -699,6 +709,7 @@ export async function handlePhotoMessage(ctx: Context): Promise<void> {
       if (savedTxn.merchant) msg += `🏪 ผู้รับ/ร้านค้า: ${savedTxn.merchant}\n`;
       msg += `🍜 หมวดหมู่: ${savedTxn.category}\n`;
       msg += `📝 รายละเอียด: ${savedTxn.description}\n`;
+      if (savedTxn.slipImageUrl) msg += `🖼️ รูปสลิป: [ดูรูปภาพ](${savedTxn.slipImageUrl})\n`;
       msg += `💳 **ยอดคงเหลือ: ${balance.currentBalance.toLocaleString('th-TH')} บาท**\n`;
       if (budgetAlert) msg += `\n${budgetAlert}`;
 
@@ -718,6 +729,7 @@ export async function handlePhotoMessage(ctx: Context): Promise<void> {
       warn += `${typeLabel} ยอด: **${txn.amount.toLocaleString('th-TH')} บาท**\n`;
       warn += `📅 วันที่: ${dayjs(txn.date).format('DD/MM/YYYY')} ${txn.time}\n`;
       if (txn.merchant) warn += `🏪 ร้านค้า/ผู้รับ: ${txn.merchant}\n`;
+      if (txn.slipImageUrl) warn += `🖼️ รูปสลิป: [ดูรูปภาพ](${txn.slipImageUrl})\n`;
       warn += `\nต้องการบันทึกอีกครั้งไหม?`;
       await ctx.reply(warn, {
         parse_mode: 'Markdown',
@@ -735,6 +747,7 @@ export async function handlePhotoMessage(ctx: Context): Promise<void> {
     card += `⏰ เวลา: ${txn.time}\n`;
     card += `💳 บัญชี: ${txn.account}\n`;
     if (txn.reference) card += `🔢 Ref: \`${txn.reference}\`\n`;
+    if (txn.slipImageUrl) card += `🖼️ รูปสลิป: [ดูรูปภาพ](${txn.slipImageUrl})\n`;
     card += `\nต้องการบันทึกหรือไม่?`;
 
     await ctx.reply(card, {
@@ -932,6 +945,7 @@ export async function handleCallbackQuery(ctx: Context): Promise<void> {
       confirmMsg += `${typeEmoji} **${savedTxn.amount.toLocaleString('th-TH')} บาท**\n`;
       confirmMsg += `🍜 หมวดหมู่: ${savedTxn.category}\n`;
       confirmMsg += `📝 รายละเอียด: ${savedTxn.description}\n`;
+      if (savedTxn.slipImageUrl) confirmMsg += `🖼️ รูปสลิป: [ดูรูปภาพ](${savedTxn.slipImageUrl})\n`;
       confirmMsg += `💳 **ยอดคงเหลือล่าสุด: ${balance.currentBalance.toLocaleString('th-TH')} บาท**\n`;
 
       processedDrafts.set(draftId, confirmMsg);
