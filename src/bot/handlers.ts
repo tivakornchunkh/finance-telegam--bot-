@@ -322,29 +322,28 @@ export async function handleLimitsCommand(ctx: Context): Promise<void> {
 
   const percentUsed = Math.min(100, Math.round((stats.dailyRequests / stats.dailyLimit) * 100));
 
-  let message = `📊 **สถานะระบบและโควต้าบริการ (Service Limits & Status)**\n\n`;
+  let message = `🟢 **สถานะระบบ (System Status & Limits)**\n`;
+  message += `─────────────────────────\n`;
+  message += `🏷️ **เวอร์ชันระบบ:** \`v1.1.0\`\n`;
+  message += `🖼️ **การแนบรูปสลิป:** 🟢 เปิดใช้งานแล้ว (คอลัมน์ P: \`SlipImage\` Active)\n`;
+  message += `☁️ **Image Hosting:** 🟢 Catbox + ImgBB พร้อมใช้งาน\n\n`;
 
-  message += `🤖 **Google Gemini AI (สมองอ่านข้อความและสลิป)**\n`;
+  message += `🤖 **Google Gemini AI (อ่านข้อความและสลิป)**\n`;
   message += `• โมเดล: \`gemini-3.6-flash\` (Google AI Studio)\n`;
   message += `• ใช้งานวันนี้: **${stats.dailyRequests} / ${stats.dailyLimit.toLocaleString('th-TH')} ครั้ง** (${percentUsed}%)\n`;
-  message += `• โควต้าคงเหลือวันนี้: **${stats.remainingDaily.toLocaleString('th-TH')} ครั้ง** (รีเซ็ตทุกเที่ยงคืน)\n`;
-  message += `• ขีดจำกัดความเร็ว: **${stats.rpmLimit} ครั้ง/นาที (RPM)**\n`;
-  if (stats.lastRequestTime) {
-    message += `• เรียกใช้งานล่าสุด: \`${stats.lastRequestTime}\`\n`;
-  }
-  message += `\n`;
+  message += `• โควต้าคงเหลือวันนี้: **${stats.remainingDaily.toLocaleString('th-TH')} ครั้ง**\n`;
+  message += `• ขีดจำกัดความเร็ว: **${stats.rpmLimit} ครั้ง/นาที (RPM)**\n\n`;
 
   message += `📑 **Google Sheets (ฐานข้อมูล)**\n`;
   message += `• สถานะ: 🟢 **เชื่อมต่อสำเร็จ (Online)**\n`;
   message += `• บันทึกวันนี้: **${todayTxns.length} รายการ**\n`;
-  message += `• บันทึกสะสมทั้งหมด: **${transactions.length} รายการ**\n`;
-  message += `• โควต้า Sheets API: **300 ครั้ง/นาที** (ไม่จำกัดจำนวนครั้งต่อวัน)\n\n`;
+  message += `• บันทึกสะสมทั้งหมด: **${transactions.length} รายการ**\n\n`;
 
   const botTag = ctx.me?.username ? `\`@${ctx.me.username}\`` : 'Bot';
-  message += `⏱️ **สถานะเซิร์ฟเวอร์บอท (${botTag})**\n`;
-  message += `• สถานะ: 🟢 **กำลังรับข้อความ (Polling Active)**\n`;
+  message += `⏱️ **สถานะเซิร์ฟเวอร์ (${botTag})**\n`;
+  message += `• สถานะ: 🟢 **ออนไลน์ พร้อมใช้งาน (Online)**\n`;
   message += `• เวลาปัจจุบัน: \`${getBangkokNow().format('YYYY-MM-DD HH:mm:ss')} (UTC+7)\`\n`;
-  message += `• เวลาแจ้งเตือนรายวัน: \`20:00\` และ \`22:00\` น.\n`;
+  message += `─────────────────────────\n`;
 
   await ctx.reply(message, { parse_mode: 'Markdown' });
 }
@@ -495,7 +494,13 @@ export async function handleTextMessage(ctx: Context): Promise<void> {
   if (text.includes('ลบรายการ')) {
     return handleDeleteCommand(ctx);
   }
-  if (text.includes('ลิมิต') || text.includes('เช็คสถานะ') || text.toLowerCase().includes('status') || text.toLowerCase().includes('limit')) {
+  if (
+    text.includes('ลิมิต') ||
+    text.includes('เช็คสถานะ') ||
+    text.toLowerCase().includes('status') ||
+    text.toLowerCase().includes('satus') ||
+    text.toLowerCase().includes('limit')
+  ) {
     return handleLimitsCommand(ctx);
   }
 
