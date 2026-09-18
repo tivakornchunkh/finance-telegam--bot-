@@ -95,9 +95,32 @@ async function bootstrap() {
     process.once('SIGINT', stop);
     process.once('SIGTERM', stop);
   } else {
-    // Polling mode (Local dev)
-    console.log('[Mode] Running in POLLING mode (Local dev)');
+    // Polling mode (Local dev or Render with Uptime ping)
+    console.log('[Mode] Running in POLLING mode');
     startReminderScheduler(bot);
+
+    // If PORT is present (Render, cloud environments), start lightweight HTTP server so Render passes port scan & UptimeRobot can ping
+    const port = process.env.PORT;
+    let pingServer: http.Server | null = null;
+
+    if (port) {
+      pingServer = http.createServer((req, res) => {
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(
+          JSON.stringify({
+            status: 'ok',
+            bot: '@wavon_bot',
+            mode: 'polling',
+            uptime: Math.round(process.uptime()),
+            timestamp: new Date().toISOString(),
+          })
+        );
+      });
+
+      pingServer.listen(Number(port), () => {
+        console.log(`[HTTP Health Check] Listening on port ${port} (Render / UptimeRobot ready)`);
+      });
+    }
 
     async function startWithRetry() {
       try {
@@ -124,6 +147,7 @@ async function bootstrap() {
     // Graceful shutdown
     const stop = async () => {
       console.log('\n[Shutdown] Stopping bot gracefully...');
+      if (pingServer) pingServer.close();
       await bot.stop();
       process.exit(0);
     };
