@@ -359,7 +359,8 @@ export async function handleBudgetCommand(ctx: Context): Promise<void> {
   if (settings.monthlyBudget <= 0) {
     let msg = `🎯 **ระบบงบประมาณรายเดือน (Monthly Budget)**\n\n`;
     msg += `ปัจจุบันคุณยังไม่ได้ตั้งงบประมาณรายเดือนครับ\n\n`;
-    msg += `💡 สามารถพิมพ์คำสั่ง เช่น: \`/setbudget 15000\` เพื่อกำหนดเพดานงบประมาณของเดือนนี้ได้เลยครับ`;
+    msg += `💡 สามารถพิมพ์คำสั่ง เช่น: \`/setbudget 15000\` เพื่อกำหนดเพดานงบประมาณของเดือนนี้ได้เลยครับ\n\n`;
+    msg += `🤖 **เวอร์ชันระบบ:** \`v1.1.0\` (Slip Image Thumbnail Active)`;
     await ctx.reply(msg, { parse_mode: 'Markdown' });
     return;
   }
@@ -391,7 +392,8 @@ export async function handleBudgetCommand(ctx: Context): Promise<void> {
   card += `📊 ความคืบหน้า: **${percent}%**\n`;
   card += `\`[${progressBar}]\`\n\n`;
   card += `${statusEmoji} สถานะ: **${statusText}**\n\n`;
-  card += `💡 เปลี่ยนงบใหม่ได้ตลอดเวลาด้วยคำสั่ง: \`/setbudget <จำนวนเงิน>\``;
+  card += `💡 เปลี่ยนงบใหม่ได้ตลอดเวลาด้วยคำสั่ง: \`/setbudget <จำนวนเงิน>\`\n\n`;
+  card += `🤖 **เวอร์ชันระบบ:** \`v1.1.0\` (Slip Image Thumbnail Active)`;
 
   await ctx.reply(card, { parse_mode: 'Markdown' });
 }
